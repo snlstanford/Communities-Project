@@ -13,15 +13,48 @@ import pandas as pd
 def f_toLower(s):
     s = s[:3].lower() + s[3:] if s[0:2] =='NS' else s[:2].lower() + s[2:] 
     return s
+
+#### read from json stream files (change the values to 999 and NA and "" if it's blank ####
+def f_fillData(varNames, temp_varNames,streamNames, data, temp_datas):
+    for j in range(4, len(varNames)):
+        if varNames[j] in temp_varNames:
+            if data['pingStates'][streamNames[i]]['currentQuestionAnswers'][varNames[j]]['nextWithoutOption']==True:
+                temp_datas = temp_datas + ["NA"]
+            elif data['pingStates'][streamNames[i]]['currentQuestionAnswers'][varNames[j]]['preferNotToAnswer']==True:
+                temp_datas = temp_datas + ["999"]
+            else:   
+                temp_datas = temp_datas + [data['pingStates'][streamNames[i]]['currentQuestionAnswers'][varNames[j]]['data']]
+        else:
+                temp_datas = temp_datas + [""]
+    print (i,streamNames[i],len(temp_varNames))
+    return temp_datas 
+
+#### path ####
+path_in ="/Users/mahnaz_SSNL/Desktop/desktoplab/research/dormStudies/Scripts/PythonCode/JsonToCSV/input"
+path_out ="/Users/mahnaz_SSNL/Desktop/desktoplab/research/dormStudies/Scripts/PythonCode/JsonToCSV/output"
+
+#### read from variable names and make a list of them ####
+df_var_names = pd.read_csv(path_in+"/var_names.csv")
+modal_varNames = [n for n in list(df_var_names['Modal']) if str(n) != 'nan']
+goal_varNames = [n for n in list(df_var_names['Goal']) if str(n) != 'nan']
+laughter_varNames = [n for n in list(df_var_names['Laughter']) if str(n) != 'nan']
+clossness_varNames = [n for n in list(df_var_names['Closeness']) if str(n) != 'nan']
+interaction_varNames =  [n for n in list(df_var_names['Interaction']) if str(n) != 'nan']
+stressor_varNames = [n for n in list(df_var_names['Stressor']) if str(n) != 'nan']
+loneliness_varNames = [n for n in list(df_var_names['Loneliness']) if str(n) != 'nan']
+anxiety_varNames = [n for n in list(df_var_names['Anxiety']) if str(n) != 'nan']
+stressor_Follow_Up_varNames = [n for n in list(df_var_names['Stressor_Follow_Up']) if str(n) != 'nan']
+loneliness_Follow_Up_varNames = [n for n in list(df_var_names['Loneliness_Follow_Up']) if str(n) != 'nan']
+anxiety_Follow_Up_varNames = [n for n in list(df_var_names['Anxiety_Follow_Up']) if str(n) != 'nan']
+ 
     
 #### read from Json file ####
-f = open("/Users/mahnaz_SSNL/Desktop/demo.json")
+f = open(path_in+"/demo3.json")
 data = json.load(f)
 f.close()
 
 
 #### predefined variables ####
-labels = ['pingTime',	'startTime'	,'endTime',	'participantID']
 modal_Data = []
 goal_Data = []
 laughter_Data = []
@@ -36,8 +69,7 @@ anxiety_Follow_Up_Data = []
 streamNames = []
 
 
-
-#### read stream namse  ####
+#### read and make dataframe  ####
 for i in range(0,len(data['pingInfos'])):
     streamNames.append(data['pingInfos'][i]['id'])
     
@@ -47,83 +79,62 @@ for i in range(0,len(data['pingInfos'])):
     temp_datas = [data['pingInfos'][i]['notificationTime'],data['pingInfos'][i]['startTime'],data['pingInfos'][i]['endTime'],data['patientId']]
     temp_varNames = list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())
 
-#### change the values to 999 and NA ####
-    for j in range(0, len(temp_varNames)):
-        if data['pingStates'][streamNames[i]]['currentQuestionAnswers'][temp_varNames[j]]['nextWithoutOption']==True:
-            temp_datas = temp_datas + ["NA"]
-        elif data['pingStates'][streamNames[i]]['currentQuestionAnswers'][temp_varNames[j]]['preferNotToAnswer']==True:
-            temp_datas = temp_datas + ["999"]
-        else:   
-            temp_datas = temp_datas + [data['pingStates'][streamNames[i]]['currentQuestionAnswers'][temp_varNames[j]]['data']]
-    
 #### create the output data for dataframe  ####  
-    if temp_streamNames == "modal":
-        if len(modal_Data)==0:
-            modal_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        modal_Data.append(temp_datas) 
+    if temp_streamNames == "modal":  
+        modal_Data.append(f_fillData(modal_varNames, temp_varNames,streamNames, data, temp_datas )) 
+
     elif temp_streamNames == "goal":
-        if len(goal_Data)==0:
-            goal_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        goal_Data.append(temp_datas)
+        goal_Data.append(f_fillData(goal_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "laughter":
-        if len(laughter_Data)==0:
-            laughter_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        laughter_Data.append(temp_datas)
-    elif temp_streamNames == "clossness":
-        if len(clossness_Data)==0:
-            clossness_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        clossness_Data.append(temp_datas)
+        laughter_Data.append(f_fillData(laughter_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
+    elif temp_streamNames == "closeness":
+        clossness_Data.append(f_fillData(clossness_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "interaction":
-        if len(goal_Data)==0:
-            interaction_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        interaction_Data.append(temp_datas)
+        interaction_Data.append(f_fillData(interaction_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "stressor":
-        if len(stressor_Data)==0:
-            stressor_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        stressor_Data.append(temp_datas)
+        stressor_Data.append(f_fillData(stressor_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "loneliness":
-        if len(loneliness_Data)==0:
-            loneliness_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        loneliness_Data.append(temp_datas)
+        loneliness_Data.append(f_fillData(loneliness_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "anxiety":
-        if len(anxiety_Data)==0:
-            anxiety_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        anxiety_Data.append(temp_datas)
+        anxiety_Data.append(f_fillData(anxiety_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "stressor_Follow_Up":
-        if len(stressor_Follow_Up_Data)==0:
-            stressor_Follow_Up_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        stressor_Follow_Up_Data.append(temp_datas)
+        stressor_Follow_Up_Data.append(f_fillData(stressor_Follow_Up_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "loneliness_Follow_Up":
-        if len(loneliness_Follow_Up_Data)==0:
-            loneliness_Follow_Up_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        loneliness_Follow_Up_Data.append(temp_datas)
+        loneliness_Follow_Up_Data.append(f_fillData(loneliness_Follow_Up_varNames, temp_varNames,streamNames, data, temp_datas ))
+    
     elif temp_streamNames == "anxiety_Follow_Up":
-        if len(anxiety_Follow_Up_Data)==0:
-            anxiety_Follow_Up_varNames = labels + [f_toLower(s) for s in list(data['pingStates'][streamNames[i]]['currentQuestionAnswers'].keys())]
-        anxiety_Follow_Up_Data.append(temp_datas)
+        anxiety_Follow_Up_Data.append(f_fillData(anxiety_Follow_Up_varNames, temp_varNames,streamNames, data, temp_datas ))
 
     
 #### create dataframe and csv file  ####
-df_temp_modal = pd.DataFrame.from_records(modal_Data, columns=modal_varNames) 
-f = df_temp_modal.to_csv("/Users/mahnaz_SSNL/Desktop/test_modal.csv")
-df_temp_goal = pd.DataFrame.from_records(goal_Data, columns=goal_varNames) 
-f = df_temp_goal.to_csv("/Users/mahnaz_SSNL/Desktop/test_goal.csv")
-df_temp_laughter = pd.DataFrame.from_records(laughter_Data, columns=laughter_varNames) 
-f = df_temp_laughter.to_csv("/Users/mahnaz_SSNL/Desktop/test_laughter.csv")
-df_temp_clossness = pd.DataFrame.from_records(clossness_Data, columns=clossness_varNames) 
-f = df_temp_clossness.to_csv("/Users/mahnaz_SSNL/Desktop/test_clossness.csv")
-df_temp_interaction = pd.DataFrame.from_records(interaction_Data, columns=interaction_varNames) 
-f = df_temp_interaction.to_csv("/Users/mahnaz_SSNL/Desktop/test_interaction.csv")
-df_temp_stressor = pd.DataFrame.from_records(stressor_Data, columns=stressor_varNames) 
-f = df_temp_stressor.to_csv("/Users/mahnaz_SSNL/Desktop/test_stressor.csv")
-df_temp_loneliness = pd.DataFrame.from_records(loneliness_Data, columns=loneliness_varNames) 
-f = df_temp_loneliness.to_csv("/Users/mahnaz_SSNL/Desktop/test_loneliness.csv")
-df_temp_anxiety = pd.DataFrame.from_records(anxiety_Data, columns=anxiety_varNames)
-f = df_temp_anxiety.to_csv("/Users/mahnaz_SSNL/Desktop/test_anxiety.csv")
-df_temp_stressor_Follow_Up = pd.DataFrame.from_records(stressor_Follow_Up_Data, columns=stressor_Follow_Up_varNames) 
-f = df_temp_stressor_Follow_Up.to_csv("/Users/mahnaz_SSNL/Desktop/test_stressor_Follow_Up.csv")
-df_temp_loneliness_Follow_Up = pd.DataFrame.from_records(loneliness_Follow_Up_Data, columns=loneliness_Follow_Up_varNames) 
-f = df_temp_loneliness_Follow_Up.to_csv("/Users/mahnaz_SSNL/Desktop/test_loneliness_Follow_Up.csv")
-df_temp_anxiety_Follow_Up = pd.DataFrame.from_records(anxiety_Follow_Up_Data, columns=anxiety_Follow_Up_varNames) 
-f = df_temp_anxiety_Follow_Up.to_csv("/Users/mahnaz_SSNL/Desktop/test_anxiety_Follow_Up.csv")
+df_temp_modal = pd.DataFrame.from_records(modal_Data, columns=[f_toLower(s) for s in modal_varNames]) 
+f = df_temp_modal.to_csv(path_out+"/modal.csv")
+df_temp_goal = pd.DataFrame.from_records(goal_Data, columns=[f_toLower(s) for s in goal_varNames]) 
+f = df_temp_goal.to_csv(path_out+"/goal.csv")
+df_temp_laughter = pd.DataFrame.from_records(laughter_Data, columns=[f_toLower(s) for s in laughter_varNames]) 
+f = df_temp_laughter.to_csv(path_out+"/laughter.csv")
+df_temp_clossness = pd.DataFrame.from_records(clossness_Data, columns=[f_toLower(s) for s in clossness_varNames]) 
+f = df_temp_clossness.to_csv(path_out+"/closeness.csv")
+df_temp_interaction = pd.DataFrame.from_records(interaction_Data, columns=[f_toLower(s) for s in interaction_varNames]) 
+f = df_temp_interaction.to_csv(path_out+"/interaction.csv")
+df_temp_stressor = pd.DataFrame.from_records(stressor_Data, columns=[f_toLower(s) for s in stressor_varNames]) 
+f = df_temp_stressor.to_csv(path_out+"/stressor.csv")
+df_temp_loneliness = pd.DataFrame.from_records(loneliness_Data, columns=[f_toLower(s) for s in loneliness_varNames]) 
+f = df_temp_loneliness.to_csv(path_out+"/loneliness.csv")
+df_temp_anxiety = pd.DataFrame.from_records(anxiety_Data, columns=[f_toLower(s) for s in anxiety_varNames])
+f = df_temp_anxiety.to_csv(path_out+"/anxiety.csv")
+df_temp_stressor_Follow_Up = pd.DataFrame.from_records(stressor_Follow_Up_Data, columns=[f_toLower(s) for s in stressor_Follow_Up_varNames]) 
+f = df_temp_stressor_Follow_Up.to_csv(path_out+"/stressor_Follow_Up.csv")
+df_temp_loneliness_Follow_Up = pd.DataFrame.from_records(loneliness_Follow_Up_Data, columns=[f_toLower(s) for s in loneliness_Follow_Up_varNames]) 
+f = df_temp_loneliness_Follow_Up.to_csv(path_out+"/loneliness_Follow_Up.csv")
+df_temp_anxiety_Follow_Up = pd.DataFrame.from_records(anxiety_Follow_Up_Data, columns=[f_toLower(s) for s in anxiety_Follow_Up_varNames]) 
+f = df_temp_anxiety_Follow_Up.to_csv(path_out+"/anxiety_Follow_Up.csv")
 
