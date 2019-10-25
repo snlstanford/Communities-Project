@@ -40,9 +40,7 @@ goal_varNames = [n for n in list(df_var_names['Goal']) if str(n) != 'nan']
 laughter_varNames = [n for n in list(df_var_names['Laughter']) if str(n) != 'nan']
 clossness_varNames = [n for n in list(df_var_names['Closeness']) if str(n) != 'nan']
 interaction_varNames =  [n for n in list(df_var_names['Interaction']) if str(n) != 'nan']
-stressor_varNames = [n for n in list(df_var_names['Stressor']) if str(n) != 'nan']
-loneliness_varNames = [n for n in list(df_var_names['Loneliness']) if str(n) != 'nan']
-anxiety_varNames = [n for n in list(df_var_names['Anxiety']) if str(n) != 'nan']
+wellBeing_varNames = [n for n in list(df_var_names['Wellbeing']) if str(n) != 'nan']
 stressor_Follow_Up_varNames = [n for n in list(df_var_names['Stressor_Follow_Up']) if str(n) != 'nan']
 loneliness_Follow_Up_varNames = [n for n in list(df_var_names['Loneliness_Follow_Up']) if str(n) != 'nan']
 anxiety_Follow_Up_varNames = [n for n in list(df_var_names['Anxiety_Follow_Up']) if str(n) != 'nan']
@@ -60,9 +58,7 @@ goal_Data = []
 laughter_Data = []
 clossness_Data = []
 interaction_Data = [] 
-stressor_Data = []
-loneliness_Data = []
-anxiety_Data = []
+wellBeing_Data = []
 stressor_Follow_Up_Data = []
 loneliness_Follow_Up_Data = []
 anxiety_Follow_Up_Data = []
@@ -95,14 +91,8 @@ for i in range(0,len(data['pingInfos'])):
     elif temp_streamNames == "interaction":
         interaction_Data.append(f_fillData(interaction_varNames, temp_varNames,streamNames, data, temp_datas ))
     
-    elif temp_streamNames == "stressor":
-        stressor_Data.append(f_fillData(stressor_varNames, temp_varNames,streamNames, data, temp_datas ))
-    
-    elif temp_streamNames == "loneliness":
-        loneliness_Data.append(f_fillData(loneliness_varNames, temp_varNames,streamNames, data, temp_datas ))
-    
-    elif temp_streamNames == "anxiety":
-        anxiety_Data.append(f_fillData(anxiety_varNames, temp_varNames,streamNames, data, temp_datas ))
+    elif temp_streamNames == "wellBeing":
+        wellBeing_Data.append(f_fillData(wellBeing_varNames, temp_varNames,streamNames, data, temp_datas ))
     
     elif temp_streamNames == "stressor_Follow_Up":
         stressor_Follow_Up_Data.append(f_fillData(stressor_Follow_Up_varNames, temp_varNames,streamNames, data, temp_datas ))
@@ -125,12 +115,8 @@ df_temp_clossness = pd.DataFrame.from_records(clossness_Data, columns=[f_toLower
 f = df_temp_clossness.to_csv(path_out+"/closeness.csv")
 df_temp_interaction = pd.DataFrame.from_records(interaction_Data, columns=[f_toLower(s) for s in interaction_varNames]) 
 f = df_temp_interaction.to_csv(path_out+"/interaction.csv")
-df_temp_stressor = pd.DataFrame.from_records(stressor_Data, columns=[f_toLower(s) for s in stressor_varNames]) 
-f = df_temp_stressor.to_csv(path_out+"/stressor.csv")
-df_temp_loneliness = pd.DataFrame.from_records(loneliness_Data, columns=[f_toLower(s) for s in loneliness_varNames]) 
-f = df_temp_loneliness.to_csv(path_out+"/loneliness.csv")
-df_temp_anxiety = pd.DataFrame.from_records(anxiety_Data, columns=[f_toLower(s) for s in anxiety_varNames])
-f = df_temp_anxiety.to_csv(path_out+"/anxiety.csv")
+df_temp_wellBeing = pd.DataFrame.from_records(wellBeing_Data, columns=[f_toLower(s) for s in wellBeing_varNames]) 
+f = df_temp_wellBeing.to_csv(path_out+"/wellBeing.csv")
 df_temp_stressor_Follow_Up = pd.DataFrame.from_records(stressor_Follow_Up_Data, columns=[f_toLower(s) for s in stressor_Follow_Up_varNames]) 
 f = df_temp_stressor_Follow_Up.to_csv(path_out+"/stressor_Follow_Up.csv")
 df_temp_loneliness_Follow_Up = pd.DataFrame.from_records(loneliness_Follow_Up_Data, columns=[f_toLower(s) for s in loneliness_Follow_Up_varNames]) 
