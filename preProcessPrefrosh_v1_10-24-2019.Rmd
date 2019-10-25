@@ -1,0 +1,86 @@
+---
+title: "prefrosh2019_preprocessing"
+author: "Dean Baltiansky"
+date: "October 16, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plyr)
+```
+
+Setting up working directory, reading the raw data set, and PID file
+
+```{r, include=FALSE}
+setwd("C:\\Users\\deanb\\OneDrive\\Documents\\School\\Grad School\\Stanford\\Social Networks\\prefrosh\\data")
+rawData <- read.csv("Stanford Communities Project - Prefrosh 2019-2020_October 16, 2019_18.31.csv")
+PIDfile <- read.csv("PIDinfo.csv")
+```
+
+Combining PID's and dorm information with the raw dataframe, reorganizing the variables, and removing those that are unnecessary/identifiable
+
+```{r}
+filteredData <- rawData[-c(1:12),] #getting rid of the pilot trials (us) and the two first rows that are just column names and descriptions
+filteredData <- merge(rawData,PIDfile,by.x = "RecipientEmail",by.y = "email") #merging by email
+names(filteredData)[names(filteredData) == "ï..PID"] <- "PID" #fixing the name of PID variable
+filteredData.columns <- variable.names(filteredData)
+filteredData <- filteredData[filteredData.columns[c(68,1:67,69:78)]] ##putting PID as the first variable
+#alright, now I'll get rid of unnecessary variables:
+filteredData[,c("RecipientEmail","StartDate","EndDate","Status","IPAddress","ResponseId","RecipientLastName","RecipientFirstName","ExternalReference","LocationLatitude","LocationLongitude","DistributionChannel","UserLanguage","FirstName_prim","MiddleName_prim","LastName_prim","FirstName_pref","MiddleName_pref","LastName_pref","SUNetID","autoEntry_prim","autoEntry_pref")] <- list(NULL)
+```
+
+Getting rid of participants who barely answered any questions
+
+```{r}
+filteredData <- filteredData[as.numeric(as.character(filteredData$Duration..in.seconds.)) > 100,]
+filteredData[filteredData==""] <- NA
+filteredData <- filteredData[rowSums(is.na(filteredData))<30,] #removing anyone who completed less than 40% of the questions
+```
+
+Recoding the values from character to numeric
+
+```{r}
+filteredData[c(7:49)] <- sapply(filteredData[c(7:49)],as.character)
+filteredData[filteredData=="Strongly Disagree\n(1)"] <- "1"
+filteredData[filteredData=="Disagree\n(2)"] <- "2"
+filteredData[filteredData=="Somewhat Disagree\n(3)"] <- "3"
+filteredData[filteredData=="Neither Agree Nor Disagree\n(4)"] <- "4"
+filteredData[filteredData=="Neither Nor Disagree\n(4)"] <- "4"
+filteredData[filteredData=="Somewhat Agree\n(5)"] <- "5"
+filteredData[filteredData=="Agree\n(6)"] <- "6"
+filteredData[filteredData=="Strongly Agree\n(7)"] <- "7"
+filteredData[filteredData=="Hardly Ever"] <- "1"
+filteredData[filteredData=="Some of the Time"] <- "2"
+filteredData[filteredData=="Very Often"] <- "3"
+filteredData[filteredData=="Not at All"] <- "1"
+filteredData[filteredData=="Occasionally"] <- "2"
+filteredData[filteredData=="Frequently"] <- "3"
+filteredData[filteredData=="Extremely Liberal\n(1)"] <- "1"
+filteredData[filteredData=="Liberal\n(2)"] <- "2"
+filteredData[filteredData=="Moderately Liberal\n(3)"] <- "3"
+filteredData[filteredData=="Moderate\n(4)"] <- "4"
+filteredData[filteredData=="Moderately Conservative\n(5)"] <- "5"
+filteredData[filteredData=="Conservative\n(6)"] <- "6"
+filteredData[filteredData=="Extremely Conservative\n(7)"] <- "7"
+filteredData[c(7:12)] <- sapply(filteredData[c(7:12)],as.numeric)
+filteredData[c(13:20)] <- sapply(filteredData[c(13:20)],as.numeric)
+filteredData[c(21:26)] <- sapply(filteredData[c(21:26)],as.numeric)
+filteredData[c(27:39)] <- sapply(filteredData[c(27:39)],as.numeric)
+filteredData[c(40:49)] <- sapply(filteredData[c(40:49)],as.numeric)
+```
+
+Recoding reversed items
+
+```{r}
+filteredData$lifeSatisfaction_6R <- 8- filteredData$lifeSatisfaction_6
+filteredData$NeedToBelong_2R <- 8-filteredData$NeedToBelong_2
+filteredData$LayEmpathy_3R <- 8-filteredData$LayEmpathy_3
+```
+
+Writing csv
+
+```{r}
+write.csv(filteredData,"df_prefroshCleanData.csv")
+```
+
